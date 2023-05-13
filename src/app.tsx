@@ -17,33 +17,40 @@ type DraggingBoxPosition = {
 };
 
 function createAppState() {
+  //doc used for store data
   const doc = new Doc();
+  //used for p2p
   const networkProvider = new WebrtcProvider("syn-global-room", doc);
+  //attatch doc with localdb
   new IndexeddbPersistence("syn-index-db", doc);
-
+  //
   const { localUser, remoteUsers, handleLogin, handleCursorPositionChange } =
     createAwarenessUsers(networkProvider);
+  //
   const boxes = doc.getArray<YMap<any>>("boxes");
-  const [draggingBoxPosition, setDraggingBoxPosition] =
-    createSignal<null | DraggingBoxPosition>(null);
+  const [draggingBoxPosition, setDraggingBoxPosition] = createSignal<null | DraggingBoxPosition>(null);
   return {
     localUser,
     remoteUsers,
     handleLogin,
-
+    //create reactive array
     boxes: createSyncArray(boxes),
+    //check if the bos is dragging
     isDragging: () => Boolean(draggingBoxPosition()),
+    //do sth when a box position change
     boxCursorDown: (newDraggingPostion: DraggingBoxPosition) => {
       if (localUser()) {
         setDraggingBoxPosition(newDraggingPostion);
       }
     },
+    //do sth when box was deleted.
     boxDelete(index: number) {
       if (localUser()) {
         setDraggingBoxPosition(null);
         boxes.delete(index);
       }
     },
+    //do sth when cursor is moving
     moveCursor(newPosition: Position) {
       handleCursorPositionChange(newPosition);
       if (!localUser()) {
@@ -70,6 +77,7 @@ function createAppState() {
       }
       setDraggingBoxPosition({ type, index, position: newPosition });
     },
+    //when cusor is released.
     releaseCursor(position: Position) {
       if (!localUser()) {
         return;

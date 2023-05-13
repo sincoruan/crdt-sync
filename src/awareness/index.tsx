@@ -14,7 +14,7 @@ type Props = {
   remoteUsers: RemoteUser[];
   localUser?: LocalUser | null;
 };
-
+//get users from webrtc
 function usersFromAwareness(awareness: WebrtcProvider["awareness"]) {
   const { clientID } = awareness;
   return {
@@ -30,15 +30,20 @@ function usersFromAwareness(awareness: WebrtcProvider["awareness"]) {
         .sort((a, b) => a.joinedOn - b.joinedOn),
   };
 }
-
+//
 export function createAwarenessUsers({ awareness }: WebrtcProvider) {
+  //get all the users from webrtc
   const { getLocalUser, getRemoteUsers } = usersFromAwareness(awareness);
+
+  //create a reactive to localuser
   const [localUser, setLocalUser] = createSignal<LocalUser | null>(
     getLocalUser()
   );
+  //create a reactive to remote user
   const [remoteUsers, setRemoteUsers] = createSignal<RemoteUser[]>(
     getRemoteUsers()
   );
+  //when awareness change, it would do sth
   createEffect(() => {
     const handler = (
       _changes: unknown[],
